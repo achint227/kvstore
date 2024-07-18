@@ -16,6 +16,13 @@ func main() {
 		return
 	}
 
+	aof, err := NewAof("database.aof")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer aof.Close()
+
 	conn, err := l.Accept()
 
 	if err != nil {
@@ -55,6 +62,10 @@ func main() {
 			fmt.Println("Invalid command: ", command)
 			writer.Write(Value{typ: "string", str: ""})
 			continue
+		}
+
+		if command == "SET" || command == "HSET" {
+			aof.Write(value)
 		}
 
 		result := handler(args)
